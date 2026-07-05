@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   postgres:
-    image: postgres:15
+    image: postgres:15-alpine
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
@@ -13,18 +11,16 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
   jupyter:
-    image: jupyter/all-spark-notebook:latest
+    image: jupyter/pyspark-notebook:latest
     ports:
       - "8888:8888"
     environment:
       JUPYTER_ENABLE_LAB: "yes"
     volumes:
       - ./notebooks:/home/jovyan/work
-      # Mount the requirements file into the container
       - ./requirements.txt:/home/jovyan/requirements.txt
     depends_on:
       - postgres
-    # Use bash -c to run pip install first, THEN start the notebook
     command: >
-      bash -c "pip install -r /home/jovyan/requirements.txt &&
+      bash -c "pip install --no-cache-dir -r /home/jovyan/requirements.txt &&
       start-notebook.sh --NotebookApp.token=''"
